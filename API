@@ -1,3 +1,29 @@
+The Gluster Native Client is a POSIX conformant, FUSE-based client running in user space.
+Gluster Native Client is the recommended method for accessing volumes when high concurrency
+and high write performance is required. 
+When reading many small files, the native NFS client will perform better. 
+
+
+
+Gluster offers multiple ways for users to access volumes in a Gluster storage cluster:
+
+Gluster Native Client - This method provides high concurrency, performance and transparent failover in GNU/Linux clients.
+The Gluster Native Client is POSIX conformant. For accessing volumes using gluster native protocol, you need to install
+gluster native client. For more information, see Gluster Native Client.
+
+
+NFS - This method provides access to gluster volumes with NFS v3. Extensive testing has be done on GNU/Linux clients
+and NFS implementation in other operating system, such as FreeBSD, and Mac OS X, as well as Windows 7 (Professional
+and Up), Windows Server 2003, and others, may work with gluster NFS server implementation. You must install nfs-common
+package on both servers and clients (only for Debian-based) distribution. For more information, see NFS
+
+
+CIFS - This method provides access to volumes when using Microsoft Windows as well as SAMBA clients. For this access
+method, Samba packages need to be present on the client side. For more information, see CIFS. 
+
+    
+    
+
 (1) Gluster环境初始化
 glfs = glfs_new(“volname”);
 glfs_set_volfile_server(glfs, transport, server, port);
