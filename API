@@ -17,6 +17,8 @@ and NFS implementation in other operating system, such as FreeBSD, and Mac OS X,
 and Up), Windows Server 2003, and others, may work with gluster NFS server implementation. You must install nfs-common
 package on both servers and clients (only for Debian-based) distribution. For more information, see NFS
 
+# mount -t nfs server1:7997:/test-volume /mnt/glusterfs
+
 
 CIFS - This method provides access to volumes when using Microsoft Windows as well as SAMBA clients. For this access
 method, Samba packages need to be present on the client side. For more information, see CIFS. 
