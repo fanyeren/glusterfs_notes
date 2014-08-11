@@ -73,3 +73,60 @@ main (int argc, char *argv[])
 
     return ret;
 }
+
+
+
+
+#  gcc -o glfs_example glfs_example.c -L /usr/lib64/ -lgfapi -I /usr/include/glusterfs/
+
+
+Gluster社区开发者基于libgfapi实现了Samba VFS plugin，从而可以绕开FUSE实现Samba与Gluster的无缝集成，大
+幅提升了CIFS访问性能。目前Samba VFS plugin相对稳定，可以深入进行测试验证，勇于偿鲜者可以考虑生产环境试用。
+
+
+
+smb.conf
+[global]
+    local master = no
+    max protocol = SMB2
+    posix locking = no
+    guest account = nobody
+    map to guest = bad password
+    
+    security = user
+    passdb backend = tdbsam
+
+    kernel oplocks = no
+    
+[share_fuse]
+    comment = None
+    path = /glfs
+    browseable = yes
+    read only = no
+    create mask = 0744
+    directory mask = 0755
+    guest ok = Yes
+
+[share_api]
+    comment = None
+    vfs object = glusterfs
+    glusterfs:volume = test
+    path = /
+    browseable = yes
+    read only = no
+    create mask = 0744
+    directory mask = 0755
+    guest ok = yes
+
+
+
+git clone git://forge.gluster.org/samba-glusterfs/samba-glusterfs-vfs.git
+
+cd ~/samba-3.6.9/source3
+./configure
+
+cd ~/samba-glusterfs-vfs
+./autogen.sh
+./configure -with-samba-source=~/samba-3.6.9/source3/
+make & make install
+cp /usr/local/samba/lib/vfs/glusterfs.so  /usr/lib64/samba//vfs/
