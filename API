@@ -1,0 +1,75 @@
+(1) Gluster环境初始化
+glfs = glfs_new(“volname”);
+glfs_set_volfile_server(glfs, transport, server, port);
+glfs_init(glfs)
+
+(2) libgfapi接口调用
+glfs_preadv_async(), glfs_writev_async()
+glfs_open(), glfs_creat(), glfs_close()
+glfs_truncate(), glfs_fstat()
+glfs_fsync_async()
+
+(3) Gluster环境释放
+glfs_fini()
+
+
+
+
+/* glfs_example.c */
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include "api/glfs.h"
+#include "api/glfs-handles.h"
+#include <string.h>
+#include <time.h>
+
+int
+main (int argc, char *argv[])
+{
+    glfs_t    *fs2 = NULL;
+    int        ret = 0;
+    glfs_fd_t *fd = NULL;
+    glfs_fd_t *fd2 = NULL;
+    char       readbuf[32];
+    char       writebuf[32];
+    char      *filename = "/filename2";
+
+    if (argc != 3) {
+        printf ("Expect following args\n\t%s <volname> <hostname>\n", argv[0]);
+        return -1;
+    }
+
+    /* 初始化gluster环境 */
+    fs2 = glfs_new (argv[1]);
+    if (!fs2) {
+        fprintf (stderr, "glfs_new: returned NULL\n");
+        return 1;
+    }
+    ret = glfs_set_volfile_server (fs2, "tcp", argv[2], 24007);
+    ret = glfs_set_logging (fs2, "/dev/stderr", 1);
+    ret = glfs_init (fs2);
+    fprintf (stderr, "glfs_init: returned %d\n", ret);
+
+    /* 进行libgfapi函数调用 */
+    fd = glfs_creat (fs2, filename, O_RDWR, 0644);
+    fprintf (stderr, "%s: (%p) %s\n", filename, fd, strerror (errno));
+
+    fd2 = glfs_open (fs2, filename, O_RDWR);
+    fprintf (stderr, "%s: (%p) %s\n", filename, fd, strerror (errno));
+
+    sprintf (writebuf, "hi there\n");
+    ret = glfs_write (fd, writebuf, 32, 0);
+
+    glfs_lseek (fd2, 0, SEEK_SET);
+    ret = glfs_read (fd2, readbuf, 32, 0);
+    printf ("read %d, %s", ret, readbuf);
+
+    glfs_close (fd);
+    glfs_close (fd2);
+
+    /* Gluster环境释放 */
+    glfs_fini (fs2);
+
+    return ret;
+}
